@@ -1,11 +1,17 @@
-FROM tomcat:9.0-jdk11-corretto
-RUN rm -rf /usr/local/tomcat/webapps/ROOT \
-           /usr/local/tomcat/webapps/docs \
-           /usr/local/tomcat/webapps/examples \
-           /usr/local/tomcat/webapps/host-manager \
-           /usr/local/tomcat/webapps/manager
-COPY attendance.war /usr/local/tomcat/webapps/attendance.war
-COPY entrypoint.sh /usr/local/tomcat/bin/entrypoint.sh
-RUN chmod +x /usr/local/tomcat/bin/entrypoint.sh
-EXPOSE 8080
-CMD ["/usr/local/tomcat/bin/entrypoint.sh"]
+#!/bin/bash
+if [ -n "$PORT" ] && [ "$PORT" != "8080" ]; then
+  sed -i.bak "s/port=\"8080\"/port=\"$PORT\"/" "$CATALINA_HOME/conf/server.xml"
+  rm -f "$CATALINA_HOME/conf/server.xml.bak"
+fi
+
+# 新增：放一个跳转页面到ROOT，访问 / 自动跳转到 /attendance
+mkdir -p "$CATALINA_HOME/webapps/ROOT"
+cat > "$CATALINA_HOME/webapps/ROOT/index.html" <<EOF
+<html>
+<head>
+<meta http-equiv="refresh" content="0;url=/attendance">
+</head>
+</html>
+EOF
+
+exec "$CATALINA_HOME/bin/catalina.sh" run
