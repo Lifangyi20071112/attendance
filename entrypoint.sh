@@ -13,4 +13,4 @@ cat > "$CATALINA_HOME/webapps/ROOT/index.html" <<EOF
 </html>
 EOF
 
-exec "$CATALINA_HOME/bin/startup.sh" 
+exec "$CATALINA_HOME/bin/catalina.sh" run
